@@ -3,8 +3,6 @@ Convert json data into DDL
 
 A simple json to DDL tool, very useful when doing ETL.
 
-<br/>
-
 Currently supported json and database type relationships:
 
 |json|DDL|
@@ -13,11 +11,9 @@ Currently supported json and database type relationships:
 |string|varchar|
 |boolean|tinyint|
 |Date|datetime|
-|`Array` \|| `object`|json|
-|`null` \|| `undefined`|null|
+|`Array` `object`|json|
+|`null` `undefined`|null|
 |other|undefined|
-
-<br/>
 
 It currently has some built-in basic rules:
 
