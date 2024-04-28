@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSON to DDL Converter</title>
+<script>
+    function convertJsonToDDL() {
+        var jsonInput = document.getElementById("jsonInput").value.trim();
+        let tableName = document.getElementById("tableName").value.trim();
+        if (!tableName) {
+            alert("Please enter a table name.");
+            return;
+        }
+        
+        try {
+            var jsonObject = JSON.parse(jsonInput);
+            var ddlOutput = generateDDL(jsonObject, tableName);
+            document.getElementById("ddlOutput").innerText = ddlOutput;
+        } catch (error) {
+            alert("Invalid JSON format: " + error);
+        }
+    }
+
+    function generateDDL(jsonObject, tableName) {
+        
+        var ddl = "CREATE TABLE IF NOT EXISTS " + tableName + " (\n";
+        
+        for (var key in jsonObject) {
+            var value = jsonObject[key];
+            var dataType = getDataType(value);
+            // json类型不设置长度
+            if (dataType === 'json') {
+                ddl += "\t" + key + " longtext,\n";    
+            } else {
+                var maxLength = value.toString().length * 2;
+                ddl += "\t" + key + " " + dataType + "(" + maxLength + "),\n";
+            }
+            
+        }
+        
+        ddl = ddl.slice(0, -2); // Remove the last comma and newline
+        ddl += "\n);";
+        
+        return ddl;
+    }
+
+    function getDataType(value) {
+        if (typeof value === 'number') {
+            if (isDecimal(value)) {
+                return "varchar";
+            }
+            return "bigint";
+        } else if (typeof value === 'string') {
+            return "varchar";
+        } else if (typeof value === 'boolean') {
+            return "tinyint";
+        } else if (value instanceof Date) {
+            return "datetime";
+        } else if (Array.isArray(value) || typeof value === 'object') {
+            return "json";
+        } else if (value === null || value === undefined) {
+            return "null";
+        } else {
+            return "undefined";
+        }
+    }
+
+    function isDecimal(num) {
+        return typeof num === 'number' && !Number.isInteger(num);
+    }
+
+    function copyDDL() {
+        var ddlOutput = document.getElementById("ddlOutput");
+        var ddlText = ddlOutput.innerText;
+        navigator.clipboard.writeText(ddlText).then(function() {
+            alert("Copied to clipboard: " + ddlText);
+        }, function() {
+            alert("Failed to copy to clipboard.");
+        });
+    }
+
+</script>
+</head>
+<body>
+    <h1>JSON to DDL Converter</h1>
+    
+    <textarea id="jsonInput" rows="10" cols="50" placeholder="Enter JSON here"></textarea><br>
+    <input type="text" id="tableName" placeholder="Table Name"/>
+    <button onclick="convertJsonToDDL()">Convert to DDL</button><br>
+    <h2>DDL Output</h2>
+    <button onclick="copyDDL()">Copy DDL</button><br>
+    <div id="ddlOutput"></div>
+</body>
+</html>
